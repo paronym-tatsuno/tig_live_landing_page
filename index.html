@@ -1,13 +1,101 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
   <head>
     <meta charset="UTF-8">
-    <link rel="icon" href="/favicon.ico">
+    <!-- <link rel="icon" href="/favicon.ico"> -->
+    <!-- 仮でfont-awesomeをcdn読み込み。不要なら取り除く -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vite App</title>
+    <title>Tig Live 紹介デモページ</title>
+    <style>
+      .tig-modal-area {
+        z-index: 5000001 !important; /* ヘッダーよりも上に */
+      }
+      .tig-movie-thumbnail {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+      }
+      /* フローティングの表示位置/サイズ */
+      .tig-archive-embed {
+          width: 13.5vh;
+          height: 24vh;
+          top: auto;
+          bottom: 3vw;
+          right: auto;
+          left: 3vw;
+          z-index: 10;
+      }
+      .tig-iframe-area {
+          z-index: 5001;
+      }
+      /* PiPの表示位置/サイズ */
+      .tig-modal.tig-modal-pip {
+        width: 13.5vh;
+        height: 24vh;
+        top: auto;
+        bottom: 3vw;
+        right: auto;
+        left: 3vw !important;
+      }
+      </style>
   </head>
   <body>
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
+    <script src="../tig-archive-embed/tig-archive-embed.js?origin"></script>
+    <script>
+      window.addEventListener('DOMContentLoaded', () => {
+          // 商品コード取得（URLの末尾がsiteItemCodeの場合）
+          const urlQueryParams = new URLSearchParams(window.location.search);
+          const siteItemCode = urlQueryParams.get('id');
+
+          var urlParam = {  // プレイヤーの再生URLパラメータとして渡したいデータ
+              ta_tag: "ecarchive"
+          };
+          var isLiveAnnounce = true;  // LIVE配信中であった場合にアーカイブの代わりにLIVE告知を表示するかどうか
+          // var urlParamForLive = {  // LIVE告知経由時にLIVEプレイヤーの再生URLパラメータとして渡したいデータ (省略時はundefinedとする。その場合はurlParamが適用)
+          //     ta_tag: "float_live"
+          // };
+          var urlParamForLive;
+          // 埋め込み元サイトの全URLパラメータをTigPlayer側へ引き継ぐ処理
+          var ignoreParams = ['id', 'autoplay']; // パラメータ名がかぶったときに埋め込み元サイトのよりTig側のパラメータを優先したいものを列挙する
+          if (window.location.search.length > 0) {
+              var pairs = window.location.search.slice(1).split('&');
+              for (var pair of pairs) {
+                  var kv = pair.split('=');
+                  if (ignoreParams.indexOf(kv[0]) === -1) {
+                      urlParam[kv[0]] = kv[1];
+                      if (urlParamForLive) {
+                          urlParamForLive[kv[0]] = kv[1];
+                      }
+                  }
+              }
+          }
+          // archive呼び出し
+          initTigArchiveEmbed({
+              groupId: "1",
+              siteItemCode,
+              // 改修 siteItemCodeをコンテンツ識別子として扱う特殊なモードを追加
+              treatSiteItemCodeAsContentId: true,
+              urlParam: urlParam,
+              isLiveAnnounce: isLiveAnnounce,
+              urlParamForLive: urlParamForLive,
+              isPip: true,
+              // 改修 pip表示を閉じた時にモーダルを破棄せず非表示するだけの指定を追加
+              pipCloseBehavior: "hide",
+              // 改修 startパラメータで再生開始位置を指定可能に
+              start: 1200,
+          });
+      });
+
+      // TigPlayerのiframeからのメッセージを受け取ってiframe APIで制御する対象として保持
+      let tigPlayer;
+      window.addEventListener('message', (event) => {
+          if (event.data?.type === 'TigIframe#event#onReady') {
+              tigPlayer = event.source;
+          }
+      });
+    </script>
   </body>
 </html>

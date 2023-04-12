@@ -1,0 +1,32 @@
+.more-show-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    // top: -44px;
+    // padding-top: 88px;
+    width: 100%;
+    height: 50px;
+    // ↓ぼかし
+    background: rgb(255, 255, 255);
+    background: linear-gradient(0deg, rgba(255, 255, 255, 1) 40%, rgba(255, 255, 255, 0) 150%);
+}
+
+.more-show {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 280px;
+    height: 52px;
+    border: 1px #b0b0b0 solid;
+    border-radius: 30px;
+    font-size: 16px;
+    background: #fff;
+    z-index: 1;
+
+    svg {
+        position: relative;
+        left: 65px;
+    }
+}

@@ -1,11 +1,24 @@
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
-import App from './App.vue'
+import { createApp } from 'vue';
+import { createPinia } from 'pinia';
+import { useTigDataStore } from '@/stores/tigData';
 
-import './assets/main.css'
+import App from './App.vue';
 
-const app = createApp(App)
+import './assets/main.css';
 
-app.use(createPinia())
+const app = createApp(App);
+app.use(createPinia());
 
-app.mount('#app')
+async function init() {
+    const tigDataStore = useTigDataStore();
+    try {
+        // 正常にデータ取得完了後、マウントする
+        await tigDataStore.fetchDataFromAPI();
+    } catch (error) {
+        tigDataStore.error = true;
+    } finally {
+        app.mount('#app');
+    }
+}
+
+init();
